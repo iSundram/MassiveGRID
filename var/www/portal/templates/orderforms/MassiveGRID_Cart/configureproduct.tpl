@@ -1,7 +1,7 @@
-y{include file="orderforms/standard_cart/common.tpl"}
+{include file="orderforms/standard_cart/common.tpl"}
 <style type="text/css">
     {literal}
-    .tooltip-inner {[]
+    .tooltip-inner {
         padding: 10px;
         color: #fff;
         text-align: left;
@@ -765,36 +765,26 @@ var _localLang = {
     }
 </script>
 
+
+{if isset($productinfo.pid) && $productinfo.pid && isset($productinfo.name) && $productinfo.name && isset($productinfo.groupname) && $productinfo.groupname}
+<script>
+window.dataLayer = window.dataLayer || [];
 dataLayer.push({
     event: "view_item",
     ecommerce: {
         items: [{
-            item_id: "{$productinfo.pid|default:$i}",
+            item_id: "{$productinfo.pid|escape:'javascript'}",
             item_name: "{$productinfo.name|escape:'javascript'}",
             item_category: "{$productinfo.groupname|escape:'javascript'}",
-            price: parseFloat("{$pricing.rawpricing.monthly.price|default:$pricing.minprice.price|replace:',':''}"),
+            price: (function() {
+                var p = "{$pricing.rawpricing.monthly.price|replace:',':''}";
+                if (!p || isNaN(p)) { p = "{$pricing.minprice.price|replace:',':''}"; }
+                return (p && !isNaN(p)) ? parseFloat(p) : 0;
+            })(),
             quantity: 1
         }]
     }
 });
-</script>
-
-{if isset($productinfo.name) && $productinfo.name}
-<script>
-if (window.dataLayer) {
-    dataLayer.push({
-        event: "view_item",
-        ecommerce: {
-            items: [{
-                item_id: "{$productinfo.pid|escape:'javascript'}",
-                item_name: "{$productinfo.name|escape:'javascript'}",
-                item_category: "{$productinfo.groupname|escape:'javascript'}",
-                price: {if isset($pricing.rawpricing.monthly.price) && $pricing.rawpricing.monthly.price != ''}parseFloat("{$pricing.rawpricing.monthly.price|replace:',':''}"){elseif isset($pricing.minprice.price) && $pricing.minprice.price != ''}parseFloat("{$pricing.minprice.price|replace:',':''}"){else}0{/if},
-                quantity: 1
-            }]
-        }
-    });
-}
 </script>
 {/if}
 
