@@ -765,7 +765,6 @@ var _localLang = {
     }
 </script>
 
-<script>
 dataLayer.push({
     event: "view_item",
     ecommerce: {
@@ -779,4 +778,23 @@ dataLayer.push({
     }
 });
 </script>
+
+{if isset($productinfo.name) && $productinfo.name}
+<script>
+if (window.dataLayer) {
+    dataLayer.push({
+        event: "view_item",
+        ecommerce: {
+            items: [{
+                item_id: "{$productinfo.pid|escape:'javascript'}",
+                item_name: "{$productinfo.name|escape:'javascript'}",
+                item_category: "{$productinfo.groupname|escape:'javascript'}",
+                price: {if isset($pricing.rawpricing.monthly.price) && $pricing.rawpricing.monthly.price != ''}parseFloat("{$pricing.rawpricing.monthly.price|replace:',':''}"){elseif isset($pricing.minprice.price) && $pricing.minprice.price != ''}parseFloat("{$pricing.minprice.price|replace:',':''}"){else}0{/if},
+                quantity: 1
+            }]
+        }
+    });
+}
+</script>
+{/if}
 
