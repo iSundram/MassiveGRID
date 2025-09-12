@@ -16,6 +16,8 @@
     dataLayer.push({
         event: "view_cart",
         ecommerce: {
+            currency: "{$currency|default:'USD'}",
+            value: parseFloat("{$total|replace:',':''}") || 0,
             items: [
                 {foreach $products as $product}
                 {
@@ -193,6 +195,8 @@
                                     dataLayer.push({
                                         event: "add_to_cart",
                                         ecommerce: {
+                                            currency: "{$currency|default:'USD'}",
+                                            value: parseFloat("{$product.pricing.baseprice|replace:',':''}") || 0,
                                             items: [{
                                                 item_id: "{$product.productinfo.pid}",
                                                 item_name: "{$product.productinfo.name|escape:'javascript'}",

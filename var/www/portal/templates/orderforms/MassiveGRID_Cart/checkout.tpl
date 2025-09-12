@@ -56,6 +56,8 @@
                 dataLayer.push({
                     event: "begin_checkout",
                     ecommerce: {
+                        currency: "{$currency|default:'USD'}",
+                        value: parseFloat("{$total|replace:',':''}") || 0,
                         items: [
                             {foreach $products as $product}
                             {

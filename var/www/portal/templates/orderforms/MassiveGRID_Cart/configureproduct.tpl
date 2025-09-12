@@ -772,6 +772,12 @@ window.dataLayer = window.dataLayer || [];
 dataLayer.push({
     event: "view_item",
     ecommerce: {
+        currency: "{$currency|default:'USD'}",
+        value: (function() {
+            var p = "{$pricing.rawpricing.monthly.price|replace:',':''}";
+            if (!p || isNaN(p)) { p = "{$pricing.minprice.price|replace:',':''}"; }
+            return (p && !isNaN(p)) ? parseFloat(p) : 0;
+        })(),
         items: [{
             item_id: "{$productinfo.pid|escape:'javascript'}",
             item_name: "{$productinfo.name|escape:'javascript'}",
