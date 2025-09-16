@@ -60,15 +60,20 @@
                         value: parseFloat("{$total|replace:',':''}") || 0,
                         items: [
                             {foreach $products as $product}
+                            {assign var="checkoutItemPrice" value=0}
+                            {if $product.pricing.totalTodayExcludingTaxSetup}
+                                {assign var="priceStr" value=$product.pricing.totalTodayExcludingTaxSetup|replace:',':''}
+                                {assign var="checkoutItemPrice" value=$priceStr|regex_replace:'/[^0-9.]/':''}
+                            {elseif $product.pricing.baseprice}
+                                {assign var="priceStr" value=$product.pricing.baseprice|replace:',':''}
+                                {assign var="checkoutItemPrice" value=$priceStr|regex_replace:'/[^0-9.]/':''}
+                            {/if}
+                            {if !$checkoutItemPrice || $checkoutItemPrice == ''}{assign var="checkoutItemPrice" value=0}{/if}
                             {
                                 item_id: "{$product.productinfo.pid}",
                                 item_name: "{$product.productinfo.name|escape:'javascript'}",
                                 item_category: "{$product.productinfo.groupname|escape:'javascript'}",
-                                price: (function() {
-                                    var priceStr = "{$product.pricing.totalTodayExcludingTaxSetup|default:$product.pricing.baseprice|replace:',':''}";
-                                    var match = priceStr.match(/[\d]+\.?[\d]*/);
-                                    return match ? parseFloat(match[0]) : 0;
-                                })(),
+                                price: parseFloat("{$checkoutItemPrice}") || 0,
                                 quantity: {$product.qty|default:1}
                             }{if !$product@last},{/if}
                             {/foreach}

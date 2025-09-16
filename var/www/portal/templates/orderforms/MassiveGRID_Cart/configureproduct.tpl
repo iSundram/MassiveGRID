@@ -767,35 +767,33 @@ var _localLang = {
 
 
 {if $productinfo.pid && $productinfo.name && $productinfo.groupname}
+{assign var="extractedPrice" value=0}
+{if $pricing.rawpricing.monthly.price}
+    {assign var="priceStr" value=$pricing.rawpricing.monthly.price|replace:',':''}
+    {assign var="extractedPrice" value=$priceStr|regex_replace:'/[^0-9.]/':''}
+{elseif $pricing.minprice.price}
+    {assign var="priceStr" value=$pricing.minprice.price|replace:',':''}
+    {assign var="extractedPrice" value=$priceStr|regex_replace:'/[^0-9.]/':''}
+{/if}
+{if !$extractedPrice || $extractedPrice == ''}{assign var="extractedPrice" value=0}{/if}
+
 <script>
 window.dataLayer = window.dataLayer || [];
 dataLayer.push({
     event: "view_item",
     ecommerce: {
         currency: "{$currency|default:'USD'}",
-        value: (function() {
-            var p = "{$pricing.rawpricing.monthly.price|replace:',':''}";
-            if (!p || isNaN(p)) { p = "{$pricing.minprice.price|replace:',':''}"; }
-            return (p && !isNaN(p)) ? parseFloat(p) : 0;
-        })(),
+        value: parseFloat("{$extractedPrice}") || 0,
         item_id: "{$productinfo.pid|escape:'javascript'}",
         item_name: "{$productinfo.name|escape:'javascript'}",
         item_category: "{$productinfo.groupname|escape:'javascript'}",
-        price: (function() {
-            var p = "{$pricing.rawpricing.monthly.price|replace:',':''}";
-            if (!p || isNaN(p)) { p = "{$pricing.minprice.price|replace:',':''}"; }
-            return (p && !isNaN(p)) ? parseFloat(p) : 0;
-        })(),
+        price: parseFloat("{$extractedPrice}") || 0,
         quantity: 1,
         items: [{
             item_id: "{$productinfo.pid|escape:'javascript'}",
             item_name: "{$productinfo.name|escape:'javascript'}",
             item_category: "{$productinfo.groupname|escape:'javascript'}",
-            price: (function() {
-                var p = "{$pricing.rawpricing.monthly.price|replace:',':''}";
-                if (!p || isNaN(p)) { p = "{$pricing.minprice.price|replace:',':''}"; }
-                return (p && !isNaN(p)) ? parseFloat(p) : 0;
-            })(),
+            price: parseFloat("{$extractedPrice}") || 0,
             quantity: 1
         }]
     }

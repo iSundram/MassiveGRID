@@ -51,6 +51,17 @@
             {if $ispaid}
                 <!-- Enter any HTML code which should be displayed when a user has completed checkout here -->
                 <!-- Common uses of this include conversion and affiliate tracking scripts -->
+                {* Preprocess purchase total value *}
+                {if $total}
+                    {assign var="orderTotal" value=$total|regex_replace:'/[^0-9.]/':''}
+                {elseif $totaldue}
+                    {assign var="orderTotal" value=$totaldue|regex_replace:'/[^0-9.]/':''}
+                {elseif $invoicetotal}
+                    {assign var="orderTotal" value=$invoicetotal|regex_replace:'/[^0-9.]/':''}
+                {else}
+                    {assign var="orderTotal" value="0"}
+                {/if}
+
                 <script>
                 // Debug: Log available variables
                 console.log('WHMCS Order Complete Debug:', {
@@ -59,52 +70,34 @@
                     ordernumber: '{$ordernumber}',
                     invoiceid: '{$invoiceid}',
                     currency: '{$currency}',
-                    products_count: '{if $products}{$products|count}{else}0{/if}'
+                    products_count: '{if $products}{$products|count}{else}0{/if}',
+                    processedTotal: '{$orderTotal}'
                 });
 
                 dataLayer.push({
                     event: "purchase",
                     ecommerce: {
                         transaction_id: "{$invoiceid|default:$orderid|default:$ordernumber}",
-                        value: (function() {
-                            // Try multiple total variables
-                            {if $total}
-                            var totalStr = "{$total|replace:',':''}";
-                            {elseif $totaldue}
-                            var totalStr = "{$totaldue|replace:',':''}";
-                            {elseif $invoicetotal}
-                            var totalStr = "{$invoicetotal|replace:',':''}";
-                            {else}
-                            var totalStr = "0";
-                            {/if}
-                            
-                            // Extract numeric value from formatted string
-                            var match = totalStr.match(/[\d]+\.?[\d]*/);
-                            var value = match ? parseFloat(match[0]) : 0;
-                            console.log('Purchase value extracted:', value, 'from:', totalStr);
-                            return value;
-                        })(),
+                        value: parseFloat("{$orderTotal}") || 0,
                         currency: "{$currency|default:'USD'}",
                         items: [
                             {if $products}
                             {foreach $products as $product}
+                                {* Preprocess product price *}
+                                {if $product.amount}
+                                    {assign var="productPrice" value=$product.amount|regex_replace:'/[^0-9.]/':''}
+                                {elseif $product.price}
+                                    {assign var="productPrice" value=$product.price|regex_replace:'/[^0-9.]/':''}
+                                {elseif $product.totaltoday}
+                                    {assign var="productPrice" value=$product.totaltoday|regex_replace:'/[^0-9.]/':''}
+                                {else}
+                                    {assign var="productPrice" value="0"}
+                                {/if}
                             {
                                 item_id: "{$product.productinfo.pid|default:$product.pid|default:'unknown'}",
                                 item_name: "{$product.productinfo.name|default:$product.name|default:'Product'|escape:'javascript'}",
                                 item_category: "{$product.productinfo.groupname|default:$product.groupname|default:'General'|escape:'javascript'}",
-                                price: (function() {
-                                    {if $product.amount}
-                                    var priceStr = "{$product.amount|replace:',':''}";
-                                    {elseif $product.price}
-                                    var priceStr = "{$product.price|replace:',':''}";
-                                    {elseif $product.totaltoday}
-                                    var priceStr = "{$product.totaltoday|replace:',':''}";
-                                    {else}
-                                    var priceStr = "0";
-                                    {/if}
-                                    var match = priceStr.match(/[\d]+\.?[\d]*/);
-                                    return match ? parseFloat(match[0]) : 0;
-                                })(),
+                                price: parseFloat("{$productPrice}") || 0,
                                 quantity: {$product.qty|default:1}
                             }{if !$product@last},{/if}
                             {/foreach}
@@ -113,17 +106,7 @@
                                 item_id: "order",
                                 item_name: "Order #{$ordernumber}",
                                 item_category: "Purchase",
-                                price: (function() {
-                                    {if $total}
-                                    var totalStr = "{$total|replace:',':''}";
-                                    {elseif $totaldue}
-                                    var totalStr = "{$totaldue|replace:',':''}";
-                                    {else}
-                                    var totalStr = "0";
-                                    {/if}
-                                    var match = totalStr.match(/[\d]+\.?[\d]*/);
-                                    return match ? parseFloat(match[0]) : 0;
-                                })(),
+                                price: parseFloat("{$orderTotal}") || 0,
                                 quantity: 1
                             }
                             {/if}
