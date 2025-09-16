@@ -24,7 +24,11 @@
                     item_id: "{$product.productinfo.pid}",
                     item_name: "{$product.productinfo.name|escape:'javascript'}",
                     item_category: "{$product.productinfo.groupname|escape:'javascript'}",
-                    price: parseFloat("{$product.pricing.baseprice|replace:',':''}"),
+                    price: (function() {
+                        var priceStr = "{$product.pricing.totalTodayExcludingTaxSetup|default:$product.pricing.baseprice|replace:',':''}";
+                        var match = priceStr.match(/[\d]+\.?[\d]*/);
+                        return match ? parseFloat(match[0]) : 0;
+                    })(),
                     quantity: {$product.qty|default:1}
                 }{if !$product@last},{/if}
                 {/foreach}
@@ -196,12 +200,29 @@
                                         event: "add_to_cart",
                                         ecommerce: {
                                             currency: "{$currency|default:'USD'}",
-                                            value: parseFloat("{$product.pricing.baseprice|replace:',':''}") || 0,
+                                            value: (function() {
+                                                var priceStr = "{$product.pricing.totalTodayExcludingTaxSetup|default:$product.pricing.baseprice|replace:',':''}";
+                                                var match = priceStr.match(/[\d]+\.?[\d]*/);
+                                                return match ? parseFloat(match[0]) : 0;
+                                            })(),
+                                            item_id: "{$product.productinfo.pid}",
+                                            item_name: "{$product.productinfo.name|escape:'javascript'}",
+                                            item_category: "{$product.productinfo.groupname|escape:'javascript'}",
+                                            price: (function() {
+                                                var priceStr = "{$product.pricing.totalTodayExcludingTaxSetup|default:$product.pricing.baseprice|replace:',':''}";
+                                                var match = priceStr.match(/[\d]+\.?[\d]*/);
+                                                return match ? parseFloat(match[0]) : 0;
+                                            })(),
+                                            quantity: {$product.qty|default:1},
                                             items: [{
                                                 item_id: "{$product.productinfo.pid}",
                                                 item_name: "{$product.productinfo.name|escape:'javascript'}",
                                                 item_category: "{$product.productinfo.groupname|escape:'javascript'}",
-                                                price: parseFloat("{$product.pricing.baseprice|replace:',':''}"),
+                                                price: (function() {
+                                                    var priceStr = "{$product.pricing.totalTodayExcludingTaxSetup|default:$product.pricing.baseprice|replace:',':''}";
+                                                    var match = priceStr.match(/[\d]+\.?[\d]*/);
+                                                    return match ? parseFloat(match[0]) : 0;
+                                                })(),
                                                 quantity: {$product.qty|default:1}
                                             }]
                                         }

@@ -766,7 +766,7 @@ var _localLang = {
 </script>
 
 
-{if isset($productinfo.pid) && $productinfo.pid && isset($productinfo.name) && $productinfo.name && isset($productinfo.groupname) && $productinfo.groupname}
+{if $productinfo.pid && $productinfo.name && $productinfo.groupname}
 <script>
 window.dataLayer = window.dataLayer || [];
 dataLayer.push({
@@ -778,6 +778,15 @@ dataLayer.push({
             if (!p || isNaN(p)) { p = "{$pricing.minprice.price|replace:',':''}"; }
             return (p && !isNaN(p)) ? parseFloat(p) : 0;
         })(),
+        item_id: "{$productinfo.pid|escape:'javascript'}",
+        item_name: "{$productinfo.name|escape:'javascript'}",
+        item_category: "{$productinfo.groupname|escape:'javascript'}",
+        price: (function() {
+            var p = "{$pricing.rawpricing.monthly.price|replace:',':''}";
+            if (!p || isNaN(p)) { p = "{$pricing.minprice.price|replace:',':''}"; }
+            return (p && !isNaN(p)) ? parseFloat(p) : 0;
+        })(),
+        quantity: 1,
         items: [{
             item_id: "{$productinfo.pid|escape:'javascript'}",
             item_name: "{$productinfo.name|escape:'javascript'}",
